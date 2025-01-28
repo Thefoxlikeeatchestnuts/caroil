@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.admin.project.co.cardlog.mapper.CardLogMapper">
+    
+    <resultMap type="CardLog" id="CardLogResult">
+        <result property="cardLogId"    column="card_log_id"    />
+        <result property="cardId"    column="card_id"    />
+        <result property="beforeMoney"    column="before_money"    />
+        <result property="curMoney"    column="cur_money"    />
+        <result property="chargNum"    column="charg_num"    />
+        <result property="remark"    column="remark"    />
+        <result property="createTime"    column="create_time"    />
+        <association property="card" resultMap="CardResult"></association>
+    </resultMap>
+    
+     <resultMap type="Card" id="CardResult">
+        <result property="userId"    column="user_id"    />
+        <result property="money"    column="money"    />
+        <result property="num"    column="num"    />
+        <association property="user" resultMap="UserResult"></association>
+    </resultMap>
+    
+     <resultMap type="User" id="UserResult">
+        <result property="loginName"    column="login_name"    />
+    </resultMap>
+
+    <sql id="selectCardLogVo">
+        select 
+        t.card_log_id, t.card_id, t.before_money, t.cur_money, t.charg_num, t.remark, t.create_time 
+        ,u.login_name
+        ,c.user_id,c.money,c.num
+        from co_card_log t
+        inner join co_card c on c.card_id = t.card_id
+        inner join sys_user u on u.user_id = c.user_id
+    </sql>
+
+    <select id="selectCardLogList" parameterType="CardLog" resultMap="CardLogResult">
+        <include refid="selectCardLogVo"/>
+        <where>  
+            <if test="cardId != null "> and t.card_id = #{cardId}</if>
+            <if test="beforeMoney != null "> and t.before_money = #{beforeMoney}</if>
+            <if test="curMoney != null "> and t.cur_money = #{curMoney}</if>
+            <if test="chargNum != null "> and t.charg_num = #{chargNum}</if>
+            <if test="card != null and card.user != null and card.user.loginName !=null and  card.user.loginName !=''"> and u.login_name = #{card.user.loginName}</if>
+            <if test="params.beginCreateTime != null and params.beginCreateTime != '' and params.endCreateTime != null and params.endCreateTime != ''"> and t.create_time between #{params.beginCreateTime} and #{params.endCreateTime}</if>
+        </where>
+    </select>
+    
+    <select id="selectCardLogById" parameterType="Long" resultMap="CardLogResult">
+        <include refid="selectCardLogVo"/>
+        where card_log_id = #{cardLogId}
+    </select>
+        
+    <insert id="insertCardLog" parameterType="CardLog">
+        insert into co_card_log
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="cardLogId != null ">card_log_id,</if>
+            <if test="cardId != null ">card_id,</if>
+            <if test="beforeMoney != null ">before_money,</if>
+            <if test="curMoney != null ">cur_money,</if>
+            <if test="chargNum != null ">charg_num,</if>
+            <if test="remark != null  and remark != ''">remark,</if>
+            <if test="createTime != null ">create_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="cardLogId != null ">#{cardLogId},</if>
+            <if test="cardId != null ">#{cardId},</if>
+            <if test="beforeMoney != null ">#{beforeMoney},</if>
+            <if test="curMoney != null ">#{curMoney},</if>
+            <if test="chargNum != null ">#{chargNum},</if>
+            <if test="remark != null  and remark != ''">#{remark},</if>
+            <if test="createTime != null ">#{createTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateCardLog" parameterType="CardLog">
+        update co_card_log
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="cardId != null ">card_id = #{cardId},</if>
+            <if test="beforeMoney != null ">before_money = #{beforeMoney},</if>
+            <if test="curMoney != null ">cur_money = #{curMoney},</if>
+            <if test="chargNum != null ">charg_num = #{chargNum},</if>
+            <if test="remark != null  and remark != ''">remark = #{remark},</if>
+            <if test="createTime != null ">create_time = #{createTime},</if>
+        </trim>
+        where card_log_id = #{cardLogId}
+    </update>
+
+    <delete id="deleteCardLogById" parameterType="Long">
+        delete from co_card_log where card_log_id = #{cardLogId}
+    </delete>
+
+    <delete id="deleteCardLogByIds" parameterType="String">
+        delete from co_card_log where card_log_id in 
+        <foreach item="cardLogId" collection="array" open="(" separator="," close=")">
+            #{cardLogId}
+        </foreach>
+    </delete>
+    
+</mapper>

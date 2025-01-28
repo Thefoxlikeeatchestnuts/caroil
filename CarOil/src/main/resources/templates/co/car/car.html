@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('车辆信息列表')" />
+</head>
+<body class="gray-bg">
+     <div class="container-div">
+        <div class="row">
+            <div class="col-sm-12 search-collapse">
+                <form id="formId">
+                    <div class="select-list">
+                        <ul>
+                            <li shiro:hasPermission="co:car:add">
+                                <p>车牌号：</p>
+                                <input type="text" name="num"/>
+                            </li>
+                            <li>
+                                <p>所属车队：</p>
+                                <input type="text" name="group"/>
+                            </li>
+                            <li>
+                                <p>品牌：</p>
+                                <input type="text" name="brand"/>
+                            </li>
+                            <li>
+                                <p>核定载重：</p>
+                                <input type="text" name="load"/>
+                            </li>
+                            <li>
+                                <p>油耗：</p>
+                                <input type="text" name="oilWea"/>
+                            </li>
+                            <li>
+                                <p>里程：</p>
+                                <input type="text" name="haveRun"/>
+                            </li>
+                            <li>
+                                <p>发动机号：</p>
+                                <input type="text" name="driverNo"/>
+                            </li>
+                            <li>
+                                <p>保险号：</p>
+                                <input type="text" name="insNum"/>
+                            </li>
+                            <li>
+                                <p>车架号：</p>
+                                <input type="text" name="frameNum"/>
+                            </li>
+                            <li>
+                                <p>底牌号：</p>
+                                <input type="text" name="chassisNum"/>
+                            </li>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                            </li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+
+            <div class="btn-group-sm" id="toolbar" role="group">
+                <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="co:car:add">
+                    <i class="fa fa-plus"></i> 添加
+                </a>
+                <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="co:car:edit">
+                    <i class="fa fa-edit"></i> 修改
+                </a>
+                <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="co:car:remove">
+                    <i class="fa fa-remove"></i> 删除
+                </a>
+                <!--<a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="co:car:export">
+                    <i class="fa fa-download"></i> 导出
+                 </a> -->
+            </div>
+            <div class="col-sm-12 select-table table-striped">
+                <table id="bootstrap-table"></table>
+            </div>
+        </div>
+    </div>
+    <th:block th:include="include :: footer" />
+    <script th:inline="javascript">
+        var editFlag = [[${@permission.hasPermi('co:car:edit')}]];
+        var removeFlag = [[${@permission.hasPermi('co:car:remove')}]];
+        var prefix = ctx + "co/car";
+
+        $(function() {
+            var options = {
+                url: prefix + "/list",
+                createUrl: prefix + "/add",
+                updateUrl: prefix + "/edit/{id}",
+                removeUrl: prefix + "/remove",
+                exportUrl: prefix + "/export",
+                modalName: "车辆信息",
+                columns: [{
+                    checkbox: true
+                },
+                {
+                    field : 'carId', 
+                    title : 'ID',
+                    visible: false
+                },
+                {
+                    field : 'user.loginName', 
+                    title : '车主'
+                },
+                {
+                    field : 'num', 
+                    title : '车牌号'
+                },
+                {
+                    field : 'group', 
+                    title : '所属车队'
+                },
+                {
+                    field : 'brand', 
+                    title : '品牌'
+                },
+                {
+                    field : 'load', 
+                    title : '核定载重'
+                },
+                {
+                    field : 'oilWea', 
+                    title : '油耗'
+                },
+                {
+                    field : 'haveRun', 
+                    title : '里程'
+                },
+                {
+                    field : 'driverNo', 
+                    title : '发动机号'
+                },
+                {
+                    field : 'insNum', 
+                    title : '保险号'
+                },
+                {
+                    field : 'frameNum', 
+                    title : '车架号'
+                },
+                {
+                    field : 'chassisNum', 
+                    title : '底牌号'
+                },
+                {
+                    field : 'remark', 
+                    title : '备注'
+                },
+                {
+                    field : 'createTime', 
+                    title : '创建时间'
+                },
+                {
+                    title: '操作',
+                    align: 'center',
+                    formatter: function(value, row, index) {
+                        var actions = [];
+                        actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.edit(\'' + row.carId + '\')"><i class="fa fa-edit"></i>编辑</a> ');
+                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.carId + '\')"><i class="fa fa-remove"></i>删除</a>');
+                        return actions.join('');
+                    }
+                }]
+            };
+            $.table.init(options);
+        });
+    </script>
+</body>
+</html>

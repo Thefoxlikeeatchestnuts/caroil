@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>统计</title>
+<link rel="shortcut icon" href="favicon.ico">
+<link href="../static/css/bootstrap.min.css"
+	th:href="@{/css/bootstrap.min.css}" rel="stylesheet" />
+<link href="../static/css/font-awesome.min.css"
+	th:href="@{/css/font-awesome.min.css}" rel="stylesheet" />
+<link href="../static/css/main/animate.min.css"
+	th:href="@{/css/main/animate.min.css}" rel="stylesheet" />
+<link href="../static/css/main/style.min862f.css"
+	th:href="@{/css/main/style.min862f.css}" rel="stylesheet" />
+</head>
+
+<body class="gray-bg">
+	<div class="wrapper wrapper-content">
+		<h1>欢迎使用物流车辆油料管理系统</h1>
+	</div>
+	<script th:src="@{/js/jquery.min.js}"></script>
+	<script th:src="@{/js/bootstrap.min.js}"></script>
+	<script th:src="@{/ajax/libs/flot/jquery.flot.js}"></script>
+
+	<th:block th:include="include :: sparkline-js" />
+
+</body>
+</html>

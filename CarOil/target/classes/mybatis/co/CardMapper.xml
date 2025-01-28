@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.admin.project.co.card.mapper.CardMapper">
+    
+    <resultMap type="Card" id="CardResult">
+        <result property="cardId"    column="card_id"    />
+        <result property="userId"    column="user_id"    />
+        <result property="money"    column="money"    />
+        <result property="num"    column="num"    />
+        <result property="remark"    column="remark"    />
+        <result property="createTime"    column="create_time"    />
+        <association property="user" resultMap="UserResult"></association>
+    </resultMap>
+    
+     <resultMap type="User" id="UserResult">
+        <result property="loginName"    column="login_name"    />
+    </resultMap>
+
+    <sql id="selectCardVo">
+        select t.card_id, t.user_id, t.money,t.num, t.remark, t.create_time,u.login_name from co_card t
+        inner join sys_user u on u.user_id = t.user_id
+    </sql>
+
+    <select id="selectCardList" parameterType="Card" resultMap="CardResult">
+        <include refid="selectCardVo"/>
+        <where>  
+            <if test="userId != null "> and t.user_id = #{userId}</if>
+            <if test="money != null "> and t.money = #{money}</if>
+            <if test="remark != null  and remark != ''"> and t.remark = #{remark}</if>
+            <if test="num != null  and num != ''"> and t.num = #{num}</if>
+            <if test="user != null  and  user.loginName != null and user.loginName != ''"> and u.login_name = #{user.loginName}</if>
+        </where>
+    </select>
+    
+    <select id="selectCardById" parameterType="Long" resultMap="CardResult">
+        <include refid="selectCardVo"/>
+        where card_id = #{cardId}
+    </select>
+        
+    <insert id="insertCard" parameterType="Card" useGeneratedKeys="true" keyProperty="cardId">
+        insert into co_card
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userId != null ">user_id,</if>
+            <if test="money != null ">money,</if>
+            <if test="remark != null  and remark != ''">remark,</if>
+            <if test="num != null  and num != ''">num,</if>
+            <if test="createTime != null ">create_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userId != null ">#{userId},</if>
+            <if test="money != null ">#{money},</if>
+            <if test="remark != null  and remark != ''">#{remark},</if>
+            <if test="num != null  and num != ''">#{num},</if>
+            <if test="createTime != null ">#{createTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateCard" parameterType="Card">
+        update co_card
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="userId != null ">user_id = #{userId},</if>
+            <if test="money != null ">money = #{money},</if>
+            <if test="remark != null  and remark != ''">remark = #{remark},</if>
+            <if test="num != null  and num != ''">num = #{num},</if>
+            <if test="createTime != null ">create_time = #{createTime},</if>
+        </trim>
+        where card_id = #{cardId}
+    </update>
+
+    <delete id="deleteCardById" parameterType="Long">
+        delete from co_card where card_id = #{cardId}
+    </delete>
+
+    <delete id="deleteCardByIds" parameterType="String">
+        delete from co_card where card_id in 
+        <foreach item="cardId" collection="array" open="(" separator="," close=")">
+            #{cardId}
+        </foreach>
+    </delete>
+    
+</mapper>

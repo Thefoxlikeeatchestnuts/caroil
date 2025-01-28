@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.admin.project.co.carlog.mapper.CarLogMapper">
+    
+    <resultMap type="CarLog" id="CarLogResult">
+        <result property="carLogId"    column="car_log_id"    />
+        <result property="no"    column="no"    />
+        <result property="carId"    column="car_id"    />
+        <result property="cardId"    column="card_id"    />
+        <result property="oilStation"    column="oil_station"    />
+        <result property="oilType"    column="oil_type"    />
+        <result property="perPrice"    column="per_price"    />
+        <result property="sum"    column="sum"    />
+        <result property="cost"    column="cost"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <association property="car" resultMap="CarResult"></association>
+        <association property="card" resultMap="CardResult"></association>
+    </resultMap>
+    
+    <resultMap type="Car" id="CarResult">
+        <result property="num"    column="num"    />
+        <result property="group"    column="group"    />
+        <result property="brand"    column="brand"    />
+        <result property="load"    column="load"    />
+        <result property="oilWea"    column="oil_wea"    />
+        <result property="haveRun"    column="have_run"    />
+        <result property="driverNo"    column="driver_no"    />
+        <result property="insNum"    column="ins_num"    />
+        <result property="frameNum"    column="frame_num"    />
+        <result property="chassisNum"    column="chassis_num"    />
+         <association property="user" resultMap="UserResult"></association>
+    </resultMap>
+
+	<resultMap type="User" id="UserResult">
+        <result property="loginName"    column="login_name"    />
+    </resultMap>
+    
+    <resultMap type="Card" id="CardResult">
+        <result property="money"    column="money"    />
+        <result property="num"    column="cnum"    />
+        <association property="user" resultMap="CUserResult"></association>
+    </resultMap>
+    
+     <resultMap type="User" id="CUserResult">
+        <result property="loginName"    column="clogin_name"    />
+    </resultMap>
+
+    <sql id="selectCarLogVo">
+        select 
+        t.car_log_id, t.no, t.car_id, t.card_id, t.oil_station, t.oil_type, t.per_price, t.sum, t.cost, t.create_by, t.create_time 
+        ,ca.num, ca.group, ca.brand, ca.load, ca.oil_wea, ca.have_run, ca.driver_no, ca.ins_num, ca.frame_num, ca.chassis_num
+        ,cd.money ,cd.num as cnum
+        ,cau.login_name
+        ,cdu.login_name as clogin_name
+        
+        from co_car_log t
+        inner join co_car ca on ca.car_id = t.car_id
+        inner join sys_user cau on cau.user_id = ca.user_id
+        inner join co_card cd on cd.card_id = t.card_id
+        inner join sys_user cdu on cdu.user_id = cd.user_id
+    </sql>
+
+    <select id="selectCarLogList" parameterType="CarLog" resultMap="CarLogResult">
+        <include refid="selectCarLogVo"/>
+        <where>  
+            <if test="no != null "> and t.no = #{no}</if>
+            <if test="carId != null "> and t.car_id = #{carId}</if>
+            <if test="cardId != null "> and t.card_id = #{cardId}</if>
+            <if test="oilStation != null  and oilStation != ''"> and t.oil_station = #{oilStation}</if>
+            <if test="oilType != null  and oilType != ''"> and t.oil_type = #{oilType}</if>
+            <if test="perPrice != null "> and t.per_price = #{perPrice}</if>
+            <if test="sum != null "> and t.sum = #{sum}</if>
+            <if test="cost != null "> and t.cost = #{cost}</if>
+             <if test="car != null and car.user != null and car.user.loginName !=null and  car.user.loginName !=''"> and ( cau.login_name = #{car.user.loginName} or cdu.login_name= #{car.user.loginName})</if>
+        	 <if test="params.beginCreateTime != null and params.beginCreateTime != '' and params.endCreateTime != null and params.endCreateTime != ''"> and t.create_time between #{params.beginCreateTime} and #{params.endCreateTime}</if>
+       		<if test="null != cars and cars.length > 0">
+       			and t.car_id in 
+		        <foreach item="cars" collection="cars" open="(" separator="," close=")">
+		            #{cars}
+	        	</foreach>
+	        </if>
+        </where>
+        order by t.create_time desc
+    </select>
+    
+    <select id="selectCarLogById" parameterType="Long" resultMap="CarLogResult">
+        <include refid="selectCarLogVo"/>
+        where car_log_id = #{carLogId}
+    </select>
+        
+    <insert id="insertCarLog" parameterType="CarLog">
+        insert into co_car_log
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="carLogId != null ">car_log_id,</if>
+            <if test="no != null ">no,</if>
+            <if test="carId != null ">car_id,</if>
+            <if test="cardId != null ">card_id,</if>
+            <if test="oilStation != null  and oilStation != ''">oil_station,</if>
+            <if test="oilType != null  and oilType != ''">oil_type,</if>
+            <if test="perPrice != null ">per_price,</if>
+            <if test="sum != null ">sum,</if>
+            <if test="cost != null ">cost,</if>
+            <if test="createBy != null  and createBy != ''">create_by,</if>
+            <if test="createTime != null ">create_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="carLogId != null ">#{carLogId},</if>
+            <if test="no != null ">#{no},</if>
+            <if test="carId != null ">#{carId},</if>
+            <if test="cardId != null ">#{cardId},</if>
+            <if test="oilStation != null  and oilStation != ''">#{oilStation},</if>
+            <if test="oilType != null  and oilType != ''">#{oilType},</if>
+            <if test="perPrice != null ">#{perPrice},</if>
+            <if test="sum != null ">#{sum},</if>
+            <if test="cost != null ">#{cost},</if>
+            <if test="createBy != null  and createBy != ''">#{createBy},</if>
+            <if test="createTime != null ">#{createTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateCarLog" parameterType="CarLog">
+        update co_car_log
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="no != null ">no = #{no},</if>
+            <if test="carId != null ">car_id = #{carId},</if>
+            <if test="cardId != null ">card_id = #{cardId},</if>
+            <if test="oilStation != null  and oilStation != ''">oil_station = #{oilStation},</if>
+            <if test="oilType != null  and oilType != ''">oil_type = #{oilType},</if>
+            <if test="perPrice != null ">per_price = #{perPrice},</if>
+            <if test="sum != null ">sum = #{sum},</if>
+            <if test="cost != null ">cost = #{cost},</if>
+            <if test="createBy != null  and createBy != ''">create_by = #{createBy},</if>
+            <if test="createTime != null ">create_time = #{createTime},</if>
+        </trim>
+        where car_log_id = #{carLogId}
+    </update>
+
+    <delete id="deleteCarLogById" parameterType="Long">
+        delete from co_car_log where car_log_id = #{carLogId}
+    </delete>
+
+    <delete id="deleteCarLogByIds" parameterType="String">
+        delete from co_car_log where car_log_id in 
+        <foreach item="carLogId" collection="array" open="(" separator="," close=")">
+            #{carLogId}
+        </foreach>
+    </delete>
+    
+</mapper>

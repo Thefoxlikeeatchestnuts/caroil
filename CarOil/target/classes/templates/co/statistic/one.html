@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('加油记录列表')" />
+    <th:block th:include="include :: select2-css" />
+</head>
+<body class="gray-bg">
+     <div class="container-div">
+        <div class="row">
+            <div class="col-sm-12 search-collapse">
+                <form id="formId">
+                    <div class="select-list">
+                        <ul>
+                            <li>
+                                <p>车辆：</p>
+                               <select id="cars" name="cars" class="form-control " >
+									<option th:each="i : ${cars}" th:text="${i.num}"
+										th:value="${i.carId}"></option>
+								</select>
+                            </li>
+                            <li class="select-time">
+                                <p>时间：</p>
+                                <input type="text" class="time-input" id="startTime" placeholder="开始时间" name="params[beginCreateTime]"/>
+                                <span>-</span>
+                                <input type="text" class="time-input" id="endTime" placeholder="结束时间" name="params[endCreateTime]"/>
+                            </li>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" id="searchBtn" ><i class="fa fa-search"></i>&nbsp;搜索</a>
+                            </li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+
+            <div class="col-sm-12 select-table table-striped">
+               <div class="ibox float-e-margins" >
+					<div class="ibox-title">
+						<h5>油料消耗统计</h5>
+					</div>
+					<div class="ibox-content">
+						<div class="echarts" style="height: 600px" id="echarts-bar-chart0"></div>
+					</div>
+				</div>
+            </div>
+        </div>
+    </div>
+    <th:block th:include="include :: footer" />
+    <th:block th:include="include :: echarts-js" />
+    <th:block th:include="include :: select2-js" />
+    <script th:inline="javascript">
+    var data = {}
+    $(function () {
+ 		  var pipeChart0 = echarts.init(document.getElementById("echarts-bar-chart0"));
+ 		  var data0 = []
+ 		  for(var item in data){
+ 			  data0.push({name:item,value:data[item]})
+ 		  }
+ 		 var option0 = {
+ 		        tooltip: {
+ 		            show: true
+ 		        },
+ 		        legend: {
+ 		            data:['消耗']
+ 		        },
+ 		        xAxis : [
+ 		            {
+ 		            	 type: 'category',
+ 		                data : []
+ 		            }
+ 		        ],
+ 		        yAxis : [
+ 		            {
+ 		                type : 'value'
+ 		            }
+ 		        ],
+ 		        series : [
+ 		            {
+ 		                "name":"消耗",
+ 		                "type":"line",
+ 		                "data":data
+ 		            }
+ 		        ]
+ 		    };
+ 	      pipeChart0.setOption(option0,true);
+ 	      window.onresize = pipeChart0.resize;
+ 	      
+ 	      $("#searchBtn").click(function(){
+ 	    	  var carId =  $("#cars").val();
+ 	    	  var startTime =  $("#startTime").val();
+ 	    	  var endTime =  $("#endTime").val();
+ 	    	   var data = {
+ 	    		   'carId':carId,
+ 	    		   'startTime':startTime,
+ 	    		   'endTime':endTime
+ 	    	   }
+ 	    	   
+ 	    	   
+ 	    	   $.ajax({
+ 	    		   url:'/co/statistic/searchOne',
+ 	    		   method:"POST",
+ 	    		   data:JSON.stringify(data),
+ 	    		   headers:{'Content-Type':'application/json;charset=utf8'},
+ 	    		   success:function(data){
+ 	    			   
+						var name = data.names
+						var value = data.values
+ 	    			    var option = pipeChart0.getOption();  //e2中感觉这个命名十分奇怪，居然要这样获取，必须先设置才有这个属性
+ 	    			    console.log(option.series)
+ 	                     option.series[0].data = value;
+ 	                     option.xAxis[0].data = name;
+ 	                    pipeChart0.setOption(option,true);
+ 	    		   }
+ 	    	   })
+ 	       })
+    }) 
+
+    </script>
+</body>
+</html>
